@@ -171,7 +171,7 @@ def render_trader_proposal(proposal: TraderProposal) -> str:
 class TradeRecommendation(BaseModel):
     """A single executable trade instruction."""
     label: str = Field(description="Human-readable label, e.g. 'Initial entry at market' or 'Add on pullback to $145'")
-    side: Literal["buy", "sell"] = Field(description="Trade direction")
+    side: Literal["buy", "sell", "hold"] = Field(description="Trade direction: buy or sell only. Never use hold — leave trade_recommendations empty instead.")
     order_type: Literal["market", "limit", "stop", "stop_limit", "trailing_stop"] = Field(default="market", description="Order type")
     allocation_pct: Optional[float] = Field(default=None, description="Percentage of portfolio to allocate (e.g. 5.0 for 5%)")
     limit_price: Optional[float] = Field(default=None, description="Limit price for limit/stop_limit orders")
@@ -262,6 +262,8 @@ def validate_pm_structured(decision: PortfolioDecision) -> dict:
     """Validate and serialize PortfolioDecision's structured trade data."""
     recs = []
     for r in decision.trade_recommendations:
+        if r.side == "hold":
+            continue
         rec = r.model_dump()
         if rec.get("allocation_pct") is not None:
             rec["allocation_pct"] = max(0.1, min(25.0, rec["allocation_pct"]))
