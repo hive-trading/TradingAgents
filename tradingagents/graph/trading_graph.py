@@ -39,6 +39,10 @@ from tradingagents.agents.utils.agent_utils import (
     get_global_news
 )
 
+from tradingagents.agents.utils.macro_tools import get_macro_indicators, get_yield_curve
+from tradingagents.agents.utils.sentiment_tools import get_options_flow, get_dark_pool, get_congress_trades, get_lobbying
+from tradingagents.agents.utils.screener_tools import get_screener_results
+
 from .checkpointer import checkpoint_step, clear_checkpoint, get_checkpointer, thread_id
 from .conditional_logic import ConditionalLogic
 from .setup import GraphSetup
@@ -186,6 +190,8 @@ class TradingAgentsGraph:
                     get_income_statement,
                 ]
             ),
+            "macro": ToolNode([get_macro_indicators, get_yield_curve]),
+            "sentiment": ToolNode([get_options_flow, get_dark_pool, get_congress_trades, get_lobbying]),
         }
 
     def _fetch_returns(
@@ -356,6 +362,7 @@ class TradingAgentsGraph:
             "sentiment_report": final_state["sentiment_report"],
             "news_report": final_state["news_report"],
             "fundamentals_report": final_state["fundamentals_report"],
+            "macro_report": final_state.get("macro_report", ""),
             "investment_debate_state": {
                 "bull_history": final_state["investment_debate_state"]["bull_history"],
                 "bear_history": final_state["investment_debate_state"]["bear_history"],

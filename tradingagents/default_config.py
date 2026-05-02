@@ -41,7 +41,10 @@ DEFAULT_CONFIG = {
         "core_stock_apis": "yfinance",       # Options: alpha_vantage, yfinance
         "technical_indicators": "yfinance",  # Options: alpha_vantage, yfinance
         "fundamental_data": "yfinance",      # Options: alpha_vantage, yfinance
-        "news_data": "yfinance",             # Options: alpha_vantage, yfinance
+        "news_data": "yfinance",             # Options: alpha_vantage, yfinance, finnhub
+        "macro_data": "fred",                # Options: fred
+        "sentiment_data": "unusual_whales",  # Options: unusual_whales, quiver
+        "screener_data": "finviz",           # Options: finviz
     },
     # Tool-level configuration (takes precedence over category-level)
     "tool_vendors": {

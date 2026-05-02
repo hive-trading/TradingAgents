@@ -5,6 +5,8 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from tradingagents.agents import *
+from tradingagents.agents.analysts.macro_analyst import create_macro_analyst
+from tradingagents.agents.analysts.sentiment_analyst import create_sentiment_analyst
 from tradingagents.agents.utils.agent_states import AgentState
 
 from .conditional_logic import ConditionalLogic
@@ -73,6 +75,16 @@ class GraphSetup:
             )
             delete_nodes["fundamentals"] = create_msg_delete()
             tool_nodes["fundamentals"] = self.tool_nodes["fundamentals"]
+
+        if "macro" in selected_analysts:
+            analyst_nodes["macro"] = create_macro_analyst(self.quick_thinking_llm)
+            delete_nodes["macro"] = create_msg_delete()
+            tool_nodes["macro"] = self.tool_nodes["macro"]
+
+        if "sentiment" in selected_analysts:
+            analyst_nodes["sentiment"] = create_sentiment_analyst(self.quick_thinking_llm)
+            delete_nodes["sentiment"] = create_msg_delete()
+            tool_nodes["sentiment"] = self.tool_nodes["sentiment"]
 
         # Create researcher and manager nodes
         bull_researcher_node = create_bull_researcher(self.quick_thinking_llm)

@@ -23,6 +23,22 @@ from .alpha_vantage import (
     get_global_news as get_alpha_vantage_global_news,
 )
 from .alpha_vantage_common import AlphaVantageRateLimitError
+from .finnhub_news import (
+    get_news as get_finnhub_news,
+    get_global_news as get_finnhub_global_news,
+)
+from .fmp import (
+    get_fundamentals as get_fmp_fundamentals,
+    get_balance_sheet as get_fmp_balance_sheet,
+    get_cashflow as get_fmp_cashflow,
+    get_income_statement as get_fmp_income_statement,
+    get_insider_transactions as get_fmp_insider_transactions,
+)
+from .polygon_stock import get_stock_data as get_polygon_stock
+from .fred import get_macro_indicators as get_fred_macro, get_yield_curve as get_fred_yield_curve
+from .unusual_whales import get_options_flow as get_uw_options_flow, get_dark_pool as get_uw_dark_pool
+from .quiver import get_congress_trades as get_quiver_congress, get_lobbying as get_quiver_lobbying
+from .finviz_screener import get_screener_results as get_finviz_screener
 
 # Configuration and routing logic
 from .config import get_config
@@ -57,12 +73,31 @@ TOOLS_CATEGORIES = {
             "get_global_news",
             "get_insider_transactions",
         ]
-    }
+    },
+    "macro_data": {
+        "description": "Macroeconomic indicators and yield curve",
+        "tools": ["get_macro_indicators", "get_yield_curve"]
+    },
+    "sentiment_data": {
+        "description": "Options flow, dark pool, congressional trades, lobbying",
+        "tools": ["get_options_flow", "get_dark_pool", "get_congress_trades", "get_lobbying"]
+    },
+    "screener_data": {
+        "description": "Stock screener queries",
+        "tools": ["get_screener_results"]
+    },
 }
 
 VENDOR_LIST = [
     "yfinance",
     "alpha_vantage",
+    "finnhub",
+    "fmp",
+    "polygon",
+    "fred",
+    "unusual_whales",
+    "quiver",
+    "finviz",
 ]
 
 # Mapping of methods to their vendor-specific implementations
@@ -71,6 +106,7 @@ VENDOR_METHODS = {
     "get_stock_data": {
         "alpha_vantage": get_alpha_vantage_stock,
         "yfinance": get_YFin_data_online,
+        "polygon": get_polygon_stock,
     },
     # technical_indicators
     "get_indicators": {
@@ -81,31 +117,62 @@ VENDOR_METHODS = {
     "get_fundamentals": {
         "alpha_vantage": get_alpha_vantage_fundamentals,
         "yfinance": get_yfinance_fundamentals,
+        "fmp": get_fmp_fundamentals,
     },
     "get_balance_sheet": {
         "alpha_vantage": get_alpha_vantage_balance_sheet,
         "yfinance": get_yfinance_balance_sheet,
+        "fmp": get_fmp_balance_sheet,
     },
     "get_cashflow": {
         "alpha_vantage": get_alpha_vantage_cashflow,
         "yfinance": get_yfinance_cashflow,
+        "fmp": get_fmp_cashflow,
     },
     "get_income_statement": {
         "alpha_vantage": get_alpha_vantage_income_statement,
         "yfinance": get_yfinance_income_statement,
+        "fmp": get_fmp_income_statement,
     },
     # news_data
     "get_news": {
         "alpha_vantage": get_alpha_vantage_news,
         "yfinance": get_news_yfinance,
+        "finnhub": get_finnhub_news,
     },
     "get_global_news": {
         "yfinance": get_global_news_yfinance,
         "alpha_vantage": get_alpha_vantage_global_news,
+        "finnhub": get_finnhub_global_news,
     },
     "get_insider_transactions": {
         "alpha_vantage": get_alpha_vantage_insider_transactions,
         "yfinance": get_yfinance_insider_transactions,
+        "fmp": get_fmp_insider_transactions,
+    },
+    # macro_data
+    "get_macro_indicators": {
+        "fred": get_fred_macro,
+    },
+    "get_yield_curve": {
+        "fred": get_fred_yield_curve,
+    },
+    # sentiment_data
+    "get_options_flow": {
+        "unusual_whales": get_uw_options_flow,
+    },
+    "get_dark_pool": {
+        "unusual_whales": get_uw_dark_pool,
+    },
+    "get_congress_trades": {
+        "quiver": get_quiver_congress,
+    },
+    "get_lobbying": {
+        "quiver": get_quiver_lobbying,
+    },
+    # screener_data
+    "get_screener_results": {
+        "finviz": get_finviz_screener,
     },
 }
 
