@@ -8,9 +8,12 @@ def create_bear_researcher(llm):
 
         current_response = investment_debate_state.get("current_response", "")
         market_research_report = state["market_report"]
-        sentiment_report = state["sentiment_report"]
+        social_report = state["social_report"]
         news_report = state["news_report"]
         fundamentals_report = state["fundamentals_report"]
+        macro_report = state["macro_report"]
+        sentiment_report = state["sentiment_report"]
+        earnings_report = state["earnings_report"]
 
         prompt = f"""You are a Bear Analyst making the case against investing in the stock. Your goal is to present a well-reasoned argument emphasizing risks, challenges, and negative indicators. Leverage the provided research and data to highlight potential downsides and counter bullish arguments effectively.
 
@@ -25,9 +28,12 @@ Key points to focus on:
 Resources available:
 
 Market research report: {market_research_report}
-Social media sentiment report: {sentiment_report}
+Social media report: {social_report}
 Latest world affairs news: {news_report}
 Company fundamentals report: {fundamentals_report}
+Macroeconomic report: {macro_report}
+Sentiment and alternative data report: {sentiment_report}
+Earnings analysis report: {earnings_report}
 Conversation history of the debate: {history}
 Last bull argument: {current_response}
 Use this information to deliver a compelling bear argument, refute the bull's claims, and engage in a dynamic debate that demonstrates the risks and weaknesses of investing in the stock.

@@ -51,12 +51,14 @@ class AgentState(MessagesState):
 
     # research step
     market_report: Annotated[str, "Report from the Market Analyst"]
-    sentiment_report: Annotated[str, "Report from the Social Media Analyst"]
+    social_report: Annotated[str, "Report from the Social Media Analyst"]
+    sentiment_report: Annotated[str, "Report from the Sentiment Analyst"]
     news_report: Annotated[
         str, "Report from the News Researcher of current world affairs"
     ]
     fundamentals_report: Annotated[str, "Report from the Fundamentals Researcher"]
     macro_report: Annotated[str, "Report from the Macro Analyst"]
+    earnings_report: Annotated[str, "Report from the Earnings Analyst"]
 
     # researcher team discussion step
     investment_debate_state: Annotated[
@@ -71,4 +73,5 @@ class AgentState(MessagesState):
         RiskDebateState, "Current state of the debate on evaluating risk"
     ]
     final_trade_decision: Annotated[str, "Final decision made by the Risk Analysts"]
+    final_trade_decision_structured: Annotated[dict, "Structured trade recommendations and price projections"]
     past_context: Annotated[str, "Memory log context injected at run start (same-ticker decisions + cross-ticker lessons)"]

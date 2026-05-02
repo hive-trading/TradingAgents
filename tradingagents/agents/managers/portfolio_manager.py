@@ -10,14 +10,14 @@ back gracefully to free-text generation.
 
 from __future__ import annotations
 
-from tradingagents.agents.schemas import PortfolioDecision, render_pm_decision
+from tradingagents.agents.schemas import PortfolioDecision, render_pm_decision, validate_pm_structured
 from tradingagents.agents.utils.agent_utils import (
     build_instrument_context,
     get_language_instruction,
 )
 from tradingagents.agents.utils.structured import (
     bind_structured,
-    invoke_structured_or_freetext,
+    invoke_structured_with_sidecar,
 )
 
 
@@ -61,13 +61,29 @@ def create_portfolio_manager(llm):
 
 ---
 
-Be decisive and ground every conclusion in specific evidence from the analysts.{get_language_instruction()}"""
+Be decisive and ground every conclusion in specific evidence from the analysts.
 
-        final_trade_decision = invoke_structured_or_freetext(
+**Trade Recommendations:**
+If your rating is Buy or Overweight, include concrete buy trade instructions in trade_recommendations.
+If your rating is Sell or Underweight and the portfolio context shows a current position, include sell trade instructions to reduce or exit the position.
+Each should specify side (buy/sell), order type, allocation percentage, and price levels.
+Consider layered entries (e.g. "buy 3% at market now, buy 2% on pullback to $X") and protective stops.
+For Hold ratings, leave trade_recommendations empty.
+
+**Price Projections:**
+Always provide 3-8 projected price points spanning your time horizon with confidence bands (low/high).
+Start from the current approximate price and project forward. This applies to ALL ratings including Hold.
+
+**Portfolio Context:**
+If portfolio data is provided below, use it to inform position sizing and sell decisions. Reference the current position size, average entry price, and unrealized P&L when relevant. If no portfolio data is present, assume no current position.
+{get_language_instruction()}"""
+
+        final_trade_decision, structured_data = invoke_structured_with_sidecar(
             structured_llm,
             llm,
             prompt,
             render_pm_decision,
+            validate_pm_structured,
             "Portfolio Manager",
         )
 
@@ -87,6 +103,7 @@ Be decisive and ground every conclusion in specific evidence from the analysts.{
         return {
             "risk_debate_state": new_risk_debate_state,
             "final_trade_decision": final_trade_decision,
+            "final_trade_decision_structured": structured_data,
         }
 
     return portfolio_manager_node

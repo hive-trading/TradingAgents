@@ -40,7 +40,8 @@ from tradingagents.agents.utils.agent_utils import (
 )
 
 from tradingagents.agents.utils.macro_tools import get_macro_indicators, get_yield_curve
-from tradingagents.agents.utils.sentiment_tools import get_options_flow, get_dark_pool, get_congress_trades, get_lobbying
+from tradingagents.agents.utils.sentiment_tools import get_options_flow, get_dark_pool, get_congress_trades, get_lobbying, get_social_mentions
+from tradingagents.agents.utils.earnings_tools import get_earnings_calendar, get_earnings_history, get_earnings_surprises, get_eps_revisions
 from tradingagents.agents.utils.screener_tools import get_screener_results
 
 from .checkpointer import checkpoint_step, clear_checkpoint, get_checkpointer, thread_id
@@ -191,7 +192,8 @@ class TradingAgentsGraph:
                 ]
             ),
             "macro": ToolNode([get_macro_indicators, get_yield_curve]),
-            "sentiment": ToolNode([get_options_flow, get_dark_pool, get_congress_trades, get_lobbying]),
+            "sentiment": ToolNode([get_options_flow, get_dark_pool, get_congress_trades, get_lobbying, get_social_mentions]),
+            "earnings": ToolNode([get_earnings_calendar, get_earnings_history, get_earnings_surprises, get_eps_revisions]),
         }
 
     def _fetch_returns(
@@ -359,10 +361,12 @@ class TradingAgentsGraph:
             "company_of_interest": final_state["company_of_interest"],
             "trade_date": final_state["trade_date"],
             "market_report": final_state["market_report"],
-            "sentiment_report": final_state["sentiment_report"],
+            "sentiment_report": final_state.get("sentiment_report", ""),
+            "social_report": final_state.get("social_report", ""),
             "news_report": final_state["news_report"],
             "fundamentals_report": final_state["fundamentals_report"],
             "macro_report": final_state.get("macro_report", ""),
+            "earnings_report": final_state.get("earnings_report", ""),
             "investment_debate_state": {
                 "bull_history": final_state["investment_debate_state"]["bull_history"],
                 "bear_history": final_state["investment_debate_state"]["bear_history"],
@@ -384,6 +388,7 @@ class TradingAgentsGraph:
             },
             "investment_plan": final_state["investment_plan"],
             "final_trade_decision": final_state["final_trade_decision"],
+            "final_trade_decision_structured": final_state.get("final_trade_decision_structured", {}),
         }
 
         # Save to file. Reject ticker values that would escape the

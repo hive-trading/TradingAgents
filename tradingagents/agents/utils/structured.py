@@ -71,3 +71,26 @@ def invoke_structured_or_freetext(
 
     response = plain_llm.invoke(prompt)
     return response.content
+
+
+def invoke_structured_with_sidecar(
+    structured_llm: Optional[Any],
+    plain_llm: Any,
+    prompt: Any,
+    render: Callable[[T], str],
+    serialize: Callable[[T], dict],
+    agent_name: str,
+) -> tuple[str, dict]:
+    """Run structured call, return (markdown, serialized_dict). Falls back to (free_text, {})."""
+    if structured_llm is not None:
+        try:
+            result = structured_llm.invoke(prompt)
+            return render(result), serialize(result)
+        except Exception as exc:
+            logger.warning(
+                "%s: structured-output invocation failed (%s); retrying once as free text",
+                agent_name, exc,
+            )
+
+    response = plain_llm.invoke(prompt)
+    return response.content, {}

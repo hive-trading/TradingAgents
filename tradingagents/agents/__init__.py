@@ -7,6 +7,7 @@ from .analysts.news_analyst import create_news_analyst
 from .analysts.social_media_analyst import create_social_media_analyst
 from .analysts.macro_analyst import create_macro_analyst
 from .analysts.sentiment_analyst import create_sentiment_analyst
+from .analysts.earnings_analyst import create_earnings_analyst
 
 from .researchers.bear_researcher import create_bear_researcher
 from .researchers.bull_researcher import create_bull_researcher
@@ -39,4 +40,5 @@ __all__ = [
     "create_trader",
     "create_macro_analyst",
     "create_sentiment_analyst",
+    "create_earnings_analyst",
 ]

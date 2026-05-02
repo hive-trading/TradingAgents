@@ -34,10 +34,21 @@ from .fmp import (
     get_income_statement as get_fmp_income_statement,
     get_insider_transactions as get_fmp_insider_transactions,
 )
+from .fmp_earnings import (
+    get_earnings_calendar as get_fmp_earnings_calendar,
+    get_earnings_history as get_fmp_earnings_history,
+    get_earnings_surprises as get_fmp_earnings_surprises,
+)
+from .yfinance_earnings import (
+    get_eps_revisions as get_yfinance_eps_revisions,
+    get_earnings_dates as get_yfinance_earnings_dates,
+)
 from .polygon_stock import get_stock_data as get_polygon_stock
 from .fred import get_macro_indicators as get_fred_macro, get_yield_curve as get_fred_yield_curve
 from .unusual_whales import get_options_flow as get_uw_options_flow, get_dark_pool as get_uw_dark_pool
 from .quiver import get_congress_trades as get_quiver_congress, get_lobbying as get_quiver_lobbying
+from .apewisdom import get_social_mentions as get_apewisdom_mentions, get_trending_stocks as get_apewisdom_trending
+from .finra_ats import get_dark_pool_volume as get_finra_dark_pool, get_dark_pool_summary as get_finra_dark_pool_summary
 from .finviz_screener import get_screener_results as get_finviz_screener
 
 # Configuration and routing logic
@@ -74,13 +85,17 @@ TOOLS_CATEGORIES = {
             "get_insider_transactions",
         ]
     },
+    "earnings_data": {
+        "description": "Earnings calendar, history, surprises, and revision signals",
+        "tools": ["get_earnings_calendar", "get_earnings_history", "get_earnings_surprises", "get_eps_revisions"]
+    },
     "macro_data": {
         "description": "Macroeconomic indicators and yield curve",
         "tools": ["get_macro_indicators", "get_yield_curve"]
     },
     "sentiment_data": {
         "description": "Options flow, dark pool, congressional trades, lobbying",
-        "tools": ["get_options_flow", "get_dark_pool", "get_congress_trades", "get_lobbying"]
+        "tools": ["get_options_flow", "get_dark_pool", "get_congress_trades", "get_lobbying", "get_social_mentions"]
     },
     "screener_data": {
         "description": "Stock screener queries",
@@ -97,6 +112,8 @@ VENDOR_LIST = [
     "fred",
     "unusual_whales",
     "quiver",
+    "apewisdom",
+    "finra",
     "finviz",
 ]
 
@@ -150,6 +167,20 @@ VENDOR_METHODS = {
         "yfinance": get_yfinance_insider_transactions,
         "fmp": get_fmp_insider_transactions,
     },
+    # earnings_data
+    "get_earnings_calendar": {
+        "fmp": get_fmp_earnings_calendar,
+        "yfinance": get_yfinance_earnings_dates,
+    },
+    "get_earnings_history": {
+        "fmp": get_fmp_earnings_history,
+    },
+    "get_earnings_surprises": {
+        "fmp": get_fmp_earnings_surprises,
+    },
+    "get_eps_revisions": {
+        "yfinance": get_yfinance_eps_revisions,
+    },
     # macro_data
     "get_macro_indicators": {
         "fred": get_fred_macro,
@@ -163,12 +194,16 @@ VENDOR_METHODS = {
     },
     "get_dark_pool": {
         "unusual_whales": get_uw_dark_pool,
+        "finra": get_finra_dark_pool,
     },
     "get_congress_trades": {
         "quiver": get_quiver_congress,
     },
     "get_lobbying": {
         "quiver": get_quiver_lobbying,
+    },
+    "get_social_mentions": {
+        "apewisdom": get_apewisdom_mentions,
     },
     # screener_data
     "get_screener_results": {

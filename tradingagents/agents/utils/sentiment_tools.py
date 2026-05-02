@@ -61,3 +61,17 @@ def get_lobbying(
         str: A formatted string containing lobbying activity data
     """
     return route_to_vendor("get_lobbying", ticker)
+
+
+@tool
+def get_social_mentions(
+    ticker: Annotated[str, "ticker symbol"],
+) -> str:
+    """
+    Retrieve Reddit social mention data for a ticker (WSB, r/stocks).
+    Args:
+        ticker (str): Ticker symbol of the company
+    Returns:
+        str: Reddit mention counts, upvotes, and rank trends
+    """
+    return route_to_vendor("get_social_mentions", ticker)

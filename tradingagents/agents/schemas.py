@@ -19,7 +19,7 @@ so that:
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -164,6 +164,34 @@ def render_trader_proposal(proposal: TraderProposal) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Trade Recommendations & Price Projections
+# ---------------------------------------------------------------------------
+
+
+class TradeRecommendation(BaseModel):
+    """A single executable trade instruction."""
+    label: str = Field(description="Human-readable label, e.g. 'Initial entry at market' or 'Add on pullback to $145'")
+    side: Literal["buy", "sell"] = Field(description="Trade direction")
+    order_type: Literal["market", "limit", "stop", "stop_limit", "trailing_stop"] = Field(default="market", description="Order type")
+    allocation_pct: Optional[float] = Field(default=None, description="Percentage of portfolio to allocate (e.g. 5.0 for 5%)")
+    limit_price: Optional[float] = Field(default=None, description="Limit price for limit/stop_limit orders")
+    stop_price: Optional[float] = Field(default=None, description="Stop price for stop/stop_limit orders")
+    trail_percent: Optional[float] = Field(default=None, description="Trail percentage for trailing_stop orders")
+    take_profit_price: Optional[float] = Field(default=None, description="Take profit level")
+    stop_loss_price: Optional[float] = Field(default=None, description="Stop loss level")
+    time_in_force: Literal["day", "gtc"] = Field(default="day", description="Time in force")
+    rationale: Optional[str] = Field(default=None, description="Brief reasoning for this specific trade")
+
+
+class PriceProjection(BaseModel):
+    """A single point in the projected price trajectory."""
+    date: str = Field(description="Date in YYYY-MM-DD format")
+    price: float = Field(description="Projected price")
+    low: Optional[float] = Field(default=None, description="Lower confidence band")
+    high: Optional[float] = Field(default=None, description="Upper confidence band")
+
+
+# ---------------------------------------------------------------------------
 # Portfolio Manager
 # ---------------------------------------------------------------------------
 
@@ -204,6 +232,8 @@ class PortfolioDecision(BaseModel):
         default=None,
         description="Optional recommended holding period, e.g. '3-6 months'.",
     )
+    trade_recommendations: list[TradeRecommendation] = Field(default_factory=list, description="Concrete trade instructions. Include for Buy/Overweight/Sell/Underweight ratings. Leave empty for Hold.")
+    price_projections: list[PriceProjection] = Field(default_factory=list, description="3-8 projected price points spanning the time horizon with confidence bands (low/high)")
 
 
 def render_pm_decision(decision: PortfolioDecision) -> str:
@@ -226,3 +256,29 @@ def render_pm_decision(decision: PortfolioDecision) -> str:
     if decision.time_horizon:
         parts.extend(["", f"**Time Horizon**: {decision.time_horizon}"])
     return "\n".join(parts)
+
+
+def validate_pm_structured(decision: PortfolioDecision) -> dict:
+    """Validate and serialize PortfolioDecision's structured trade data."""
+    recs = []
+    for r in decision.trade_recommendations:
+        rec = r.model_dump()
+        if rec.get("allocation_pct") is not None:
+            rec["allocation_pct"] = max(0.1, min(25.0, rec["allocation_pct"]))
+        for price_field in ("limit_price", "stop_price", "take_profit_price", "stop_loss_price"):
+            if rec.get(price_field) is not None and rec[price_field] <= 0:
+                rec[price_field] = None
+        recs.append(rec)
+
+    projs = []
+    for p in decision.price_projections:
+        proj = p.model_dump()
+        if proj.get("low") is not None and proj.get("high") is not None and proj["low"] > proj["high"]:
+            proj["low"], proj["high"] = proj["high"], proj["low"]
+        projs.append(proj)
+    projs.sort(key=lambda x: x["date"])
+
+    return {
+        "trade_recommendations": recs,
+        "price_projections": projs,
+    }
